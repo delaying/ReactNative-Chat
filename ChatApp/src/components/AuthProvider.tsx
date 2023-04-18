@@ -9,10 +9,12 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [initialized, setInitialized] = useState(false);
   const [user, setUser] = useState<User | null>(null);
   const [processingSignup, setProcessingSignup] = useState(false);
+  const [processingSignin, setProcessingSignin] = useState(false);
 
   useEffect(() => {
     //이 프로바이더가 마운트 될 때 사용자이벤트를 받음
     const unsubscribe = auth().onUserChanged(async fbUser => {
+      console.log(fbUser);
       if (fbUser !== null) {
         //login
         setUser({
@@ -53,6 +55,16 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     },
     [],
   );
+
+  const signin = useCallback(async (email: string, password: string) => {
+    try {
+      setProcessingSignin(true);
+      auth().signInWithEmailAndPassword(email, password);
+    } finally {
+      setProcessingSignin(false);
+    }
+  }, []);
+
   //provider
   const value = useMemo(() => {
     return {
@@ -60,8 +72,10 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       user,
       signup,
       processingSignup,
+      signin,
+      processingSignin,
     };
-  }, [initialized, user, signup, processingSignup]);
+  }, [initialized, user, signup, processingSignup, signin, processingSignin]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
