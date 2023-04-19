@@ -16,6 +16,7 @@ import {
 } from 'react-native';
 import Colors from '../modules/Colors';
 import AuthContext from '../components/AuthContext';
+import Message from './Message';
 
 const styles = StyleSheet.create({
   container: {
@@ -52,6 +53,7 @@ const styles = StyleSheet.create({
   },
   messageList: {
     flex: 1,
+    marginVertical: 15, //margin top & bottom 같이줄수있음.
   },
   inputContainer: {
     flexDirection: 'row',
@@ -83,6 +85,9 @@ const styles = StyleSheet.create({
   sendIcon: {
     color: Colors.WHITE,
     fontSize: 18,
+  },
+  messageSeparator: {
+    height: 8,
   },
 });
 
@@ -136,17 +141,22 @@ const ChatScreen = () => {
           />
         </View>
         <FlatList
+          inverted //스크롤을 윗방향으로 할 수 있음.
           style={styles.messageList}
           data={messages}
           renderItem={({ item: message }) => {
             return (
-              <View>
-                <Text>{message.user.name}</Text>
-                <Text>{message.text}</Text>
-                <Text>{message.createdAt.toISOString()}</Text>
-              </View>
+              <Message
+                name={message.user.name}
+                text={message.text}
+                createdAt={message.createdAt}
+                isOtherMessage={message.user.userId !== me?.userId}
+              />
             );
           }}
+          ItemSeparatorComponent={() => (
+            <View style={styles.messageSeparator} />
+          )}
         />
         <View style={styles.inputContainer}>
           <View style={styles.textInputContainder}>
@@ -166,7 +176,15 @@ const ChatScreen = () => {
         </View>
       </View>
     );
-  }, [chat, onChangeText, text, sendDisabled, onPressSendButton, messages]);
+  }, [
+    chat,
+    onChangeText,
+    text,
+    sendDisabled,
+    onPressSendButton,
+    messages,
+    me?.userId,
+  ]);
 
   return (
     <Screen title={other.name}>
