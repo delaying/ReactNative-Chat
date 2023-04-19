@@ -3,6 +3,11 @@ export type RootStackParamList = {
   Signin: undefined;
   Home: undefined;
   Loading: undefined;
+  //   스크린에 param을 넘겨야할땐 여기에 정의해야함
+  Chat: {
+    userIds: string[];
+    other: User;
+  };
 };
 
 export interface User {
@@ -13,4 +18,11 @@ export interface User {
 
 export enum Collections {
   USERS = 'users',
+  CHATS = 'chats',
+}
+
+export interface Chat {
+  id: string;
+  userIds: string[];
+  users: User[];
 }
