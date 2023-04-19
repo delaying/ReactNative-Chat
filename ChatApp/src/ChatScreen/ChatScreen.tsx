@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useContext, useMemo, useState } from 'react';
 import Screen from '../components/Screen';
 import { RouteProp, useRoute } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
@@ -15,6 +15,7 @@ import {
   View,
 } from 'react-native';
 import Colors from '../modules/Colors';
+import AuthContext from '../components/AuthContext';
 
 const styles = StyleSheet.create({
   container: {
@@ -97,9 +98,12 @@ const ChatScreen = () => {
   // navigate로 넘겨준 파라미터를 받아오기
   const { params } = useRoute<RouteProp<RootStackParamList, 'Chat'>>();
   const { other, userIds } = params;
-  const { loadingChat, chat } = useChat(userIds);
+  const { loadingChat, chat, sendMessage, messages, loadingMessages } =
+    useChat(userIds);
   const [text, setText] = useState('');
   const sendDisabled = useMemo(() => text.length === 0, [text]);
+  const { user: me } = useContext(AuthContext);
+  const loading = loadingChat || loadingMessages;
 
   const onChangeText = useCallback((newText: string) => {
     setText(newText);
@@ -107,8 +111,11 @@ const ChatScreen = () => {
 
   const onPressSendButton = useCallback(() => {
     //send text
-    setText('');
-  }, []);
+    if (me != null) {
+      sendMessage(text, me);
+      setText('');
+    }
+  }, [me, sendMessage, text]);
 
   const renderChat = useCallback(() => {
     if (chat == null) {
@@ -128,7 +135,19 @@ const ChatScreen = () => {
             horizontal //가로정렬
           />
         </View>
-        <View style={styles.messageList} />
+        <FlatList
+          style={styles.messageList}
+          data={messages}
+          renderItem={({ item: message }) => {
+            return (
+              <View>
+                <Text>{message.user.name}</Text>
+                <Text>{message.text}</Text>
+                <Text>{message.createdAt.toISOString()}</Text>
+              </View>
+            );
+          }}
+        />
         <View style={styles.inputContainer}>
           <View style={styles.textInputContainder}>
             <TextInput
@@ -147,12 +166,12 @@ const ChatScreen = () => {
         </View>
       </View>
     );
-  }, [chat, onChangeText, text, sendDisabled, onPressSendButton]);
+  }, [chat, onChangeText, text, sendDisabled, onPressSendButton, messages]);
 
   return (
     <Screen title={other.name}>
       <View style={styles.container}>
-        {loadingChat ? (
+        {loading ? (
           <View style={styles.loadingContainer}>
             <ActivityIndicator />
           </View>
