@@ -1,4 +1,10 @@
-import React, { useCallback, useContext, useMemo, useState } from 'react';
+import React, {
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react';
 import Screen from '../components/Screen';
 import { RouteProp, useRoute } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
@@ -18,6 +24,7 @@ import Colors from '../modules/Colors';
 import AuthContext from '../components/AuthContext';
 import Message from './Message';
 import UserPhoto from '../components/UserPhoto';
+import moment from 'moment';
 
 const styles = StyleSheet.create({
   container: {
@@ -104,12 +111,25 @@ const ChatScreen = () => {
   // navigate로 넘겨준 파라미터를 받아오기
   const { params } = useRoute<RouteProp<RootStackParamList, 'Chat'>>();
   const { other, userIds } = params;
-  const { loadingChat, chat, sendMessage, messages, loadingMessages } =
-    useChat(userIds);
+  const {
+    loadingChat,
+    chat,
+    sendMessage,
+    messages,
+    loadingMessages,
+    updateMessageReadAt,
+    userToMessageReadAt,
+  } = useChat(userIds);
   const [text, setText] = useState('');
   const sendDisabled = useMemo(() => text.length === 0, [text]);
   const { user: me } = useContext(AuthContext);
   const loading = loadingChat || loadingMessages;
+
+  useEffect(() => {
+    if (me != null && messages.length > 0) {
+      updateMessageReadAt(me.userId);
+    }
+  }, [me, messages.length, updateMessageReadAt]);
 
   const onChangeText = useCallback((newText: string) => {
     setText(newText);
@@ -151,6 +171,15 @@ const ChatScreen = () => {
           data={messages}
           renderItem={({ item: message }) => {
             const user = chat.users.find(u => u.userId === message.user.userId);
+            const unreadUsers = chat.users.filter(u => {
+              const messageReadAt = userToMessageReadAt[u.userId] ?? null;
+
+              if (messageReadAt == null) {
+                return true;
+              }
+              return moment(messageReadAt).isBefore(message.createdAt);
+            });
+            const unreadCount = unreadUsers.length;
             return (
               <Message
                 name={user?.name ?? ''}
@@ -158,6 +187,7 @@ const ChatScreen = () => {
                 createdAt={message.createdAt}
                 isOtherMessage={message.user.userId !== me?.userId}
                 imageUrl={user?.profileUrl}
+                unreadCount={unreadCount}
               />
             );
           }}
@@ -191,6 +221,7 @@ const ChatScreen = () => {
     onPressSendButton,
     messages,
     me?.userId,
+    userToMessageReadAt,
   ]);
 
   return (
