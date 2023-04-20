@@ -31,6 +31,16 @@ const useChat = (userIds: string[]) => {
     });
   }, []);
 
+  // 채팅방에서 프로필이미지를 가져오기위함
+  const loadUsers = async (uIds: string[]) => {
+    const usersSnapshot = await firestore()
+      .collection(Collections.USERS)
+      .where('userId', 'in', uIds)
+      .get();
+    const users = usersSnapshot.docs.map<User>(doc => doc.data() as User);
+    return users;
+  };
+
   const loadChat = useCallback(async () => {
     try {
       setLoadingChat(true);
@@ -42,20 +52,18 @@ const useChat = (userIds: string[]) => {
 
       if (chatSnapshot.docs.length > 0) {
         const doc = chatSnapshot.docs[0];
+        const chatUserIds = doc.data().userIds as string[];
+        const users = await loadUsers(chatUserIds);
+
         setChat({
           id: doc.id,
-          userIds: doc.data().userIds as string[],
-          users: doc.data().users as User[],
+          userIds: chatUserIds,
+          users: users,
         });
         return;
       }
 
-      // userId에 userIds가 포함된 데이터만 가져오게됨.
-      const usersSnapshot = await firestore()
-        .collection(Collections.USERS)
-        .where('userId', 'in', userIds)
-        .get();
-      const users = usersSnapshot.docs.map(doc => doc.data() as User);
+      const users = await loadUsers(userIds);
       const data = {
         userIds: getChatKey(userIds),
         users,
