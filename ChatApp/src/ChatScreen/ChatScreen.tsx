@@ -25,6 +25,7 @@ import AuthContext from '../components/AuthContext';
 import Message from './Message';
 import UserPhoto from '../components/UserPhoto';
 import moment from 'moment';
+import ImageCropPicker from 'react-native-image-crop-picker';
 
 const styles = StyleSheet.create({
   container: {
@@ -97,6 +98,24 @@ const styles = StyleSheet.create({
   messageSeparator: {
     height: 8,
   },
+  imageButton: {
+    borderWidth: 1,
+    borderColor: Colors.BLACK,
+    width: 50,
+    height: 50,
+    borderRadius: 8,
+    marginLeft: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  imageIcon: {
+    color: Colors.BLACK,
+    fontSize: 32,
+  },
+  sendingContainer: {
+    alignItems: 'flex-end',
+    paddingTop: 10,
+  },
 });
 
 const disabledSendButtonStyle = [
@@ -119,6 +138,8 @@ const ChatScreen = () => {
     loadingMessages,
     updateMessageReadAt,
     userToMessageReadAt,
+    sendImageMessage,
+    sending,
   } = useChat(userIds);
   const [text, setText] = useState('');
   const sendDisabled = useMemo(() => text.length === 0, [text]);
@@ -142,6 +163,13 @@ const ChatScreen = () => {
       setText('');
     }
   }, [me, sendMessage, text]);
+
+  const onPressImageButton = useCallback(async () => {
+    if (me != null) {
+      const image = await ImageCropPicker.openPicker({ cropping: true });
+      sendImageMessage(image.path, me);
+    }
+  }, [me, sendImageMessage]);
 
   const renderChat = useCallback(() => {
     if (chat == null) {
@@ -180,20 +208,40 @@ const ChatScreen = () => {
               return moment(messageReadAt).isBefore(message.createdAt);
             });
             const unreadCount = unreadUsers.length;
-            return (
-              <Message
-                name={user?.name ?? ''}
-                text={message.text}
-                createdAt={message.createdAt}
-                isOtherMessage={message.user.userId !== me?.userId}
-                imageUrl={user?.profileUrl}
-                unreadCount={unreadCount}
-              />
-            );
+
+            const commonProps = {
+              name: user?.name ?? '',
+              createdAt: message.createdAt,
+              isOtherMessage: message.user.userId !== me?.userId,
+              userImageUrl: user?.profileUrl,
+              unreadCount: unreadCount,
+            };
+            if (message.text != null) {
+              return (
+                <Message {...commonProps} message={{ text: message.text }} />
+              );
+            }
+            if (message.imageUrl != null) {
+              return (
+                <Message {...commonProps} message={{ url: message.imageUrl }} />
+              );
+            }
+            return null;
           }}
           ItemSeparatorComponent={() => (
             <View style={styles.messageSeparator} />
           )}
+          // inverted flatlist라 header가 밑부분에 위치함
+          ListHeaderComponent={() => {
+            if (sending) {
+              return (
+                <View style={styles.sendingContainer}>
+                  <ActivityIndicator />
+                </View>
+              );
+            }
+            return null;
+          }}
         />
         <View style={styles.inputContainer}>
           <View style={styles.textInputContainder}>
@@ -210,6 +258,11 @@ const ChatScreen = () => {
             onPress={onPressSendButton}>
             <Icon name="send" style={styles.sendIcon} />
           </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.imageButton}
+            onPress={onPressImageButton}>
+            <Icon name="image" style={styles.imageIcon} />
+          </TouchableOpacity>
         </View>
       </View>
     );
@@ -222,6 +275,8 @@ const ChatScreen = () => {
     messages,
     me?.userId,
     userToMessageReadAt,
+    onPressImageButton,
+    sending,
   ]);
 
   return (

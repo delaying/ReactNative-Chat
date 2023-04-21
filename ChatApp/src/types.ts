@@ -32,7 +32,8 @@ export interface Chat {
 export interface Message {
   id: string;
   user: User;
-  text: string;
+  text: string | null;
+  imageUrl: string | null;
   createdAt: Date;
 }
 
