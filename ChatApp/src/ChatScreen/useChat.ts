@@ -3,7 +3,7 @@ import firestore, {
   FirebaseFirestoreTypes,
 } from '@react-native-firebase/firestore';
 import storage from '@react-native-firebase/storage';
-import _ from 'lodash';
+import _, { add } from 'lodash';
 
 import { Chat, Collections, Message, User } from '../types';
 
@@ -108,6 +108,7 @@ const useChat = (userIds: string[]) => {
             text: text,
             user: user,
             imageUrl: null,
+            audioUrl: null,
             createdAt: new Date(),
           },
         ]);
@@ -144,6 +145,7 @@ const useChat = (userIds: string[]) => {
               id: doc.id,
               text: docData.text ?? null,
               imageUrl: docData.imageUrl ?? null,
+              audioUrl: docData.audioUrl ?? null,
               user: docData.user,
               createdAt: docData.createdAt.toDate(),
             };
@@ -246,6 +248,57 @@ const useChat = (userIds: string[]) => {
             id: doc.id,
             text: null,
             imageUrl: url,
+            audioUrl: null,
+            user: user,
+            createdAt: new Date(),
+          },
+        ]);
+      } finally {
+        setSending(false);
+      }
+    },
+    [addNewMessage, chat],
+  );
+
+  // 오디오 메시지 보내기
+  const sendAudioMessage = useCallback(
+    async (filepath: string, user: User) => {
+      setSending(true);
+      try {
+        if (chat == null) {
+          throw new Error('Undefined chat');
+        }
+
+        if (user == null) {
+          throw new Error('Undefined user');
+        }
+
+        const originalFilename = _.last(filepath.split('/'));
+        if (originalFilename == null) {
+          throw new Error('Undefined filename');
+        }
+
+        const fileExt = originalFilename.split('.');
+        const filename = `${Date.now()}.${fileExt}`;
+        const storagePath = `chat/${chat.id}/${filename}`;
+        await storage().ref(storagePath).putFile(filepath);
+        const url = await storage().ref(storagePath).getDownloadURL();
+
+        const doc = await firestore()
+          .collection(Collections.CHATS)
+          .doc(chat.id)
+          .collection(Collections.MESSAGES)
+          .add({
+            audioUrl: url,
+            user: user,
+            createdAt: firestore.FieldValue.serverTimestamp(),
+          });
+        addNewMessage([
+          {
+            id: doc.id,
+            text: null,
+            imageUrl: null,
+            audioUrl: url,
             user: user,
             createdAt: new Date(),
           },
@@ -267,6 +320,7 @@ const useChat = (userIds: string[]) => {
     updateMessageReadAt,
     userToMessageReadAt,
     sendImageMessage,
+    sendAudioMessage,
   };
 };
 
