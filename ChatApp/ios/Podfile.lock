@@ -1038,12 +1038,12 @@ PODS:
     - Firebase/Storage (= 10.7.0)
     - React-Core
     - RNFBApp
-  - RNImageCropPicker (0.39.0):
+  - RNImageCropPicker (0.38.1):
     - React-Core
     - React-RCTImage
-    - RNImageCropPicker/QBImagePickerController (= 0.39.0)
+    - RNImageCropPicker/QBImagePickerController (= 0.38.1)
     - TOCropViewController
-  - RNImageCropPicker/QBImagePickerController (0.39.0):
+  - RNImageCropPicker/QBImagePickerController (0.38.1):
     - React-Core
     - React-RCTImage
     - TOCropViewController
@@ -1265,7 +1265,7 @@ SPEC CHECKSUMS:
   RNFBAuth: d30acc0f5f169bc28c7fcbf1b45cd061cc647590
   RNFBFirestore: c505e6f96e70fb029ae1961c73965fd13ce92db5
   RNFBStorage: d40ebadfad4755ed1ef6a74cae84c9ee9ca47ffd
-  RNImageCropPicker: 14fe1c29298fb4018f3186f455c475ab107da332
+  RNImageCropPicker: 648356d68fbf9911a1016b3e3723885d28373eda
   RNScreens: 218801c16a2782546d30bd2026bb625c0302d70f
   RNVectorIcons: fcc2f6cb32f5735b586e66d14103a74ce6ad61f8
   TOCropViewController: edfd4f25713d56905ad1e0b9f5be3fbe0f59c863
