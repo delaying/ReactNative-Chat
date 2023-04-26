@@ -11,6 +11,7 @@
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import React, { useCallback, useContext } from 'react';
+import Toast from 'react-native-toast-message';
 
 import { RootStackParamList } from './src/types';
 import SignupScreen from './src/SignupScreen/SignupScreen';
@@ -65,6 +66,7 @@ const App = () => {
   return (
     <AuthProvider>
       <Screens />
+      <Toast />
     </AuthProvider>
   );
 };

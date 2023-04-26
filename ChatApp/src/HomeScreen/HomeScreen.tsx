@@ -2,6 +2,7 @@ import React, { useCallback, useContext, useEffect, useState } from 'react';
 import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
 import messaging from '@react-native-firebase/messaging';
+import Toast from 'react-native-toast-message';
 
 import Screen from '../components/Screen';
 import AuthContext from '../components/AuthContext';
@@ -15,7 +16,7 @@ import {
 } from 'react-native';
 import Colors from '../modules/Colors';
 import { Collections, RootStackParamList, User } from '../types';
-import { useNavigation } from '@react-navigation/native';
+import { useIsFocused, useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import ImageCropPicker from 'react-native-image-crop-picker';
 import Profile from './Profile';
@@ -105,6 +106,8 @@ const HomeScreen = () => {
   const [users, setUsers] = useState<User[]>([]);
   const { navigate } =
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+  // 홈스크린에 있을때만 push알림띄우기 위해 사용
+  const isFocused = useIsFocused();
 
   //   로그아웃
   const onPressLogout = useCallback(() => {
@@ -184,6 +187,38 @@ const HomeScreen = () => {
         }
       });
   }, [navigate]);
+
+  // 3. App: foreground일 경우 알림띄우기
+  useEffect(() => {
+    const unsubscribe = messaging().onMessage(remoteMessage => {
+      console.log('onMessage', remoteMessage);
+      const { notification } = remoteMessage;
+      if (notification != null) {
+        const { title, body } = notification;
+
+        if (isFocused) {
+          Toast.show({
+            type: 'success',
+            text1: title,
+            text2: body,
+            // 토스트 누르면 화면이동
+            onPress: () => {
+              const stringifiedUserIds = remoteMessage.data?.userIds;
+              if (stringifiedUserIds != null) {
+                // string으로 바꿨던걸 다시 parsing
+                const userIds = JSON.parse(stringifiedUserIds) as string[];
+                navigate('Chat', { userIds });
+              }
+            },
+          });
+        }
+      }
+    });
+
+    return () => {
+      unsubscribe();
+    };
+  }, [navigate, isFocused]);
 
   if (me == null) {
     return null;
