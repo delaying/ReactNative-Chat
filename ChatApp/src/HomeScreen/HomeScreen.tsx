@@ -1,6 +1,7 @@
 import React, { useCallback, useContext, useEffect, useState } from 'react';
 import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
+import messaging from '@react-native-firebase/messaging';
 
 import Screen from '../components/Screen';
 import AuthContext from '../components/AuthContext';
@@ -147,6 +148,43 @@ const HomeScreen = () => {
     [],
   );
 
+  // 1. App : background 상태에 있는 경우
+  useEffect(() => {
+    // push를 눌렀을때 어떻게할지 설정
+    const unsubscribe = messaging().onNotificationOpenedApp(remoteMessage => {
+      console.log('remoteMessage', remoteMessage);
+      // 컨솔결과 - remoteMessage {"collapseKey": "com.delaying.chatapp", "data": {"userIds": "[\"8N31b2AsRHXzCxJWLNTqMH4T6Ml2\",\"QhKVZoKYJBPo8cegl14YFtpJc0v1\"]"}, "from": "286777113696", "messageId": "0:1682517291089524%553b6927553b6927", "notification": {"android": {}, "body": "Ddddd: Hi", "title": "메시지가 도착했습니다."}, "sentTime": 1682517291079, "ttl": 2419200}
+
+      const stringifiedUserIds = remoteMessage.data?.userIds;
+      if (stringifiedUserIds != null) {
+        // string으로 바꿨던걸 다시 parsing
+        const userIds = JSON.parse(stringifiedUserIds) as string[];
+        navigate('Chat', { userIds });
+      }
+    });
+
+    // useEffect가 unmount될때 실행
+    return () => {
+      unsubscribe();
+    };
+  }, [navigate]);
+
+  // 2. App : Quit 상태에 있는 경우
+  useEffect(() => {
+    // 이 effect가 실행될때 초기 notification정보를 가지고 활용할 수 있음
+    messaging()
+      .getInitialNotification()
+      .then(remoteMessage => {
+        console.log('getInitialNotification', remoteMessage);
+        const stringifiedUserIds = remoteMessage?.data?.userIds;
+        if (stringifiedUserIds != null) {
+          // string으로 바꿨던걸 다시 parsing
+          const userIds = JSON.parse(stringifiedUserIds) as string[];
+          navigate('Chat', { userIds });
+        }
+      });
+  }, [navigate]);
+
   if (me == null) {
     return null;
   }
@@ -188,7 +226,6 @@ const HomeScreen = () => {
                     onPress={() => {
                       navigate('Chat', {
                         userIds: [me.userId, user.userId],
-                        other: user,
                       });
                     }}>
                     <UserPhoto

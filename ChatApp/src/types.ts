@@ -6,7 +6,6 @@ export type RootStackParamList = {
   //   스크린에 param을 넘겨야할땐 여기에 정의해야함
   Chat: {
     userIds: string[];
-    other: User;
   };
 };
 
