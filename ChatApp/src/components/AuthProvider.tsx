@@ -95,6 +95,23 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     [user],
   );
 
+  // fcm토큰 저장
+  const addFcmToken = useCallback(
+    async (token: string) => {
+      if (user != null) {
+        await firestore()
+          .collection(Collections.USERS)
+          .doc(user.userId)
+          .update({
+            // fcmToken에 이미 array가 있으면 토큰을 추가해줌.
+            // ios와 android 토큰을 모두 관리하기 위해 array형태로 사용.
+            fcmTokens: firestore.FieldValue.arrayUnion(token),
+          });
+      }
+    },
+    [user],
+  );
+
   //provider
   const value = useMemo(() => {
     return {
@@ -105,6 +122,7 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       signin,
       processingSignin,
       updateProfileImage,
+      addFcmToken,
     };
   }, [
     initialized,
@@ -114,6 +132,7 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     signin,
     processingSignin,
     updateProfileImage,
+    addFcmToken,
   ]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
