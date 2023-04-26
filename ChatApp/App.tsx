@@ -20,12 +20,14 @@ import AuthContext from './src/components/AuthContext';
 import HomeScreen from './src/HomeScreen/HomeScreen';
 import LoadingScreen from './src/LoadingScreen/LoadingScreen';
 import ChatScreen from './src/ChatScreen/ChatScreen';
+import usePushNotification from './src/hooks/usePushNotification';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 const Screens = () => {
   const { user, processingSignin, processingSignup, initialized } =
     useContext(AuthContext);
+  usePushNotification();
 
   // 로그인상태에 따라서 홈화면이나 로그인화면 보여주기
   const renderRootStack = useCallback(() => {
