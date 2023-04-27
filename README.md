@@ -4,19 +4,50 @@
 
 ios는 실물 기기로, android는 에뮬레이터로 녹화하였습니다.
 
-- 회원가입 및 로그인
-  <img src="" width="200" height="400">
+### 회원가입 및 로그인
 
-- 실시간 채팅, 이미지와 음성메시지 보내고 확인하기 -> 확인시 1 사라짐
-  <img src="" width="200" height="400">
+  <img src="https://user-images.githubusercontent.com/72879145/234798854-010784cb-85db-4feb-bd0e-630e30c05ee2.GIF" width="200" height="400">
 
-- 실시간 알림(background, quit, foreground상태)
-  <img src="" width="200" height="400">
+### 실시간 채팅 및 push알림
 
-- 사진 자세히보기, 로그아웃
-  <img src="" width="200" height="400">
+- background, quit, foreground상태에 따른 push 알림
+
+- 이미지와 음성메시지 보내고 확인. 확인시 1 사라짐
+
+#### ios
+
+  <img src="https://user-images.githubusercontent.com/72879145/234798825-b675fa10-0971-4fde-b1a7-3117c06b31ba.GIF" width="200" height="400">
+
+#### android
+
+  <img src="https://user-images.githubusercontent.com/72879145/234798790-a265191e-00a1-4453-8157-db45110617fe.GIF" width="200" height="400">
+
+#### 사진 자세히보기, 로그아웃
+
+  <img src="https://user-images.githubusercontent.com/72879145/234798844-77cc71d4-0eba-4594-9de1-db4e82ec4b05.GIF" width="200" height="400">
 
 ## 정리
+
+---
+
+목차
+
+- [구현 기능](#구현기능)
+- [Firebase 설정](#firebase)
+- [react-navigation 패키지 설치](#react-navigation-패키지-설치)
+- [회원가입 페이지 구현](#회원가입-페이지-구현)
+- [채팅방 페이지 구현](#채팅방)
+- [메시지 보내기 및 불러오기 기능](#메시지-보내기-및-불러오기-기능)
+- [채팅 메시지 구현](#채팅-메시지-구현)
+- [시간 출력](#시간-출력)
+- [실시간 새로운 메시지 받기 구현](#실시간-새로운-메시지-받기-구현)
+- [프로필 이미지 등록](#프로필-이미지-등록)
+- [메시지 읽음 표시 구현](#메시지-읽음-표시-구현)
+- [음성메시지 전송](#음성메시지-전송)
+- [react-native-firebase-messaging](#react-native-firebase-messaging)
+- [Push Notification](#메시지-도착-실시간-알림)
+
+---
 
 ### 구현기능
 
@@ -46,7 +77,7 @@ ios는 실물 기기로, android는 에뮬레이터로 녹화하였습니다.
 
 ### react-navigation 패키지 설치
 
-- npm install --save @react-navigation/native-stack @react-navigation/native react-native-screens react-native-safe-area-context
+- `npm install --save @react-navigation/native-stack @react-navigation/native react-native-screens react-native-safe-area-context`
 
 ### 회원가입 페이지 구현
 
@@ -74,11 +105,11 @@ ios는 실물 기기로, android는 에뮬레이터로 녹화하였습니다.
 
 ### 채팅방
 
-- npm i lodash
-- npm i @types/lodash --save
+- `npm i lodash`
+- `npm i @types/lodash --save`
 - `await firestore().collection(Collections.CHATS)`
-  - .add는 문서 상관없이 추가
-  - .doc는 문서명 따로 설정 가능
+  - `.add`는 문서 상관없이 추가
+  - `.doc`는 문서명 따로 설정 가능
 - useChat hook 작성
 
   ```jsx
@@ -237,7 +268,7 @@ ios는 실물 기기로, android는 에뮬레이터로 녹화하였습니다.
 
 ### 시간 출력
 
-- npm i moment
+- `npm i moment`
 - 포맷 형식 작성해주면됨
 
 ```jsx
@@ -300,10 +331,10 @@ ios는 실물 기기로, android는 에뮬레이터로 녹화하였습니다.
   ```
 - firebase storage에 이미지 업로드
   - firebase storage 시작 및 패키지 설치
-  - npm i @react-native-firebase/storage
+  - `npm i @react-native-firebase/storage`
   - firebase 관련 패키지 버전을 똑같이 맞춰주어야함
     ```json
-    		"@react-native-firebase/app": "^17.4.2",
+    	"@react-native-firebase/app": "^17.4.2",
         "@react-native-firebase/auth": "^17.4.2",
         "@react-native-firebase/firestore": "^17.4.2",
         "@react-native-firebase/storage": "^17.4.2",
@@ -424,28 +455,29 @@ export default MicButton;
   - firebase cloud functions 프로젝트 초기화
     [https://firebase.google.com/docs/functions?hl=ko](https://firebase.google.com/docs/functions?hl=ko)
 
-    - [https://firebase.google.com/docs/functions/firestore-events?hl=ko](https://firebase.google.com/docs/functions/firestore-events?hl=ko)
+  - [https://firebase.google.com/docs/functions/firestore-events?hl=ko](https://firebase.google.com/docs/functions/firestore-events?hl=ko)
 
-      cloud functions을 사용하기 위해서는 firebase무료(spark)요금제로는 사용 불가능 → 사용할수록 요금이 부과되는 Blaze요금제를 사용해야 함
+    cloud functions을 사용하기 위해서는 firebase무료(spark)요금제로는 사용 불가능 → 사용할수록 요금이 부과되는 Blaze요금제를 사용해야 함
 
-      - firestore trigger이용시 문서가 업데이트,생성,삭제 될때 서버에서 실행될 수 있는 코드 구현가능
+    - firestore trigger이용시 문서가 업데이트,생성,삭제 될때 서버에서 실행될 수 있는 코드 구현가능
 
-    - 사용
-      `npm install -g firebase-tools`
-      [https://firebase.google.com/docs/functions/get-started?hl=ko](https://firebase.google.com/docs/functions/get-started?hl=ko)
-      링크 참고하여 프로젝트 setting
-      - login → functions기능선택 → 기존 프로젝트 선택 → 사용언어선택
-      - 패키지 설치나 실행시 ChatAppServer > functions 폴더 내에서 작업
-    - npm i eslint-config-prettier -s
-      - eslint와 prettier가 충돌할 때 (4칸띄울지 2칸띄울지 등) 한가지를 선택하는 패키지
-      - .eslint.rc파일에서 다음내용추가
-        ```jsx
-        extends: [
-            "prettier",
-          ],
-        ```
-    - npm i firebase-admin
-      - function에서 문서를 읽기위해 사용
+  - 사용
+    `npm install -g firebase-tools`
+    [https://firebase.google.com/docs/functions/get-started?hl=ko](https://firebase.google.com/docs/functions/get-started?hl=ko)
+    링크 참고하여 프로젝트 setting
+    - login → functions기능선택 → 기존 프로젝트 선택 → 사용언어선택
+    - 패키지 설치나 실행시 ChatAppServer > functions 폴더 내에서 작업
+  - npm i eslint-config-prettier -s
+    - eslint와 prettier가 충돌할 때 (4칸띄울지 2칸띄울지 등) 한가지를 선택하는 패키지
+    - .eslint.rc파일에서 다음내용추가
+      ```jsx
+      extends: [
+          "prettier",
+        ],
+      ```
+  - npm i firebase-admin
+
+    - function에서 문서를 읽기위해 사용
 
   - 서버에서 firestore 실시간 업데이트 수신하기
   - 새로운 메시지 생성 시 Push Notification 전송
@@ -464,7 +496,7 @@ export default MicButton;
       - app.tsx에 <Toast /> 컴포넌트 추가
   - ios APNs(Apple Push Notifications service)설정
     - ios Messaging setup
-      [https://rnfirebase.io/messaging/usage/ios-setup](https://rnfirebase.io/messaging/usage/ios-setup)
+    - [https://rnfirebase.io/messaging/usage/ios-setup](https://rnfirebase.io/messaging/usage/ios-setup)
       - capabilities 추가
       - APNs 키 등록
         - [developer.apple.com](https://developer.apple.com/account/resources/authkeys/list)
